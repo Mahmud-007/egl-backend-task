@@ -1,0 +1,10 @@
+[
+  {
+    "eventType": "user_signup",
+    "data": {
+      "email": "test@example.com",
+      "name": "John Doe"
+    },
+    "timestamp": "2025-02-12T12:49:13.573Z"
+  }
+]
