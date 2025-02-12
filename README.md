@@ -1,40 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Backend Developer Task - Everything Green Limited
 
-## Getting Started
+This repository contains the solution for the Backend Developer position at Everything Green Limited. The task is divided into two parts: **API Development & Authentication** and **Webhook Implementation**. Below is an explanation of each task and how I approached it.
 
-First, run the development server:
+## Task 1: API Development & Authentication
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### API Routes:
+1. **GET /api/users** - Fetches all users from the database.
+2. **POST /api/users** - Allows you to add a new user with `name`, `email`, and `password`.
+3. **GET /api/users/:id** - Fetches a user by their unique `id`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Authentication:
+- The API routes are secured using **JWT Authentication**. A middleware is used to verify the token in the `Authorization` header for each request.
+- If the token is invalid or missing, the API will respond with an error message, requiring the user to provide a valid token to access the endpoints.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+### Database:
+- **MongoDB** is used with **Mongoose** for storing and managing the user data. 
+- The user model includes fields for `name`, `email`, and `password`, with password hashes stored securely using **bcryptjs**.
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### Implementation Details:
+- I implemented middleware to handle the authentication flow and used Mongoose for database management.
+- The `POST /api/users` endpoint checks if the user already exists before creating a new user to prevent duplicate entries.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Task 2: Webhook Implementation
 
-## Learn More
+### Webhook Endpoint:
+- **POST /api/webhook** - Receives data sent to the webhook, validates the request signature, and processes the event data. 
 
-To learn more about Next.js, take a look at the following resources:
+### Webhook Signature Verification:
+- A secret key (`WEBHOOK_SECRET`) is used to generate a HMAC signature from the request body. The webhook checks if the `x-signature` header matches the computed signature to ensure that the request came from a trusted source.
+- If the signature is invalid, the webhook responds with a `401` error.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+### Storing Event Data:
+- The webhook stores the received data (including the `eventType` and `data` fields) in a JSON file (`db.json`) on the server.
+- Each event entry contains a timestamp to track when the event was received.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Generate Webhook Signature:
+- A separate route, **POST /api/generate-webhook-signature**, can be used to generate a valid signature for a payload.
+- This is useful for testing the webhook with valid signatures.
 
-## Deploy on Vercel
+### Example Payload:
+Here is an example of the expected data format sent to the webhook:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+```json
+{
+  "eventType": "user_signup",
+  "data": {
+    "email": "test@example.com",
+    "name": "John Doe"
+  }
+}
